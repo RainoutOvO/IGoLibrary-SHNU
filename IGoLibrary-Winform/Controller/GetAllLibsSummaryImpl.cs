@@ -39,7 +39,7 @@ namespace IGoLibrary_Winform.Controller
                 request.AddHeader("Sec-Fetch-Site", @"same-site");
                 request.AddHeader("Sec-Fetch-Mode", @"cors");
                 request.AddHeader("Sec-Fetch-Dest", @"empty");
-                request.AddHeader("Referer", @"https://libseat.shnu.edu.cn/web/index.html");
+                request.AddHeader("Referer", @"https://libseat.shnu.edu.cn/web/");
                 request.AddHeader("Accept-Encoding", @"gzip, deflate, br");
                 request.AddHeader("Accept-Language", @"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
                 //以上信息都是通用的

@@ -155,7 +155,17 @@ internal sealed class TraceIntApiClient(
             throw new InvalidOperationException("Cookie不包含关键身份信息，可能是code过期，重新填写含code的链接");
         }
 
-        return $"{responseCookies[1]}; {responseCookies[0]}";
+        var authorization = responseCookies.FirstOrDefault(cookie =>
+            cookie.StartsWith("Authorization=", StringComparison.OrdinalIgnoreCase));
+        var serverId = responseCookies.FirstOrDefault(cookie =>
+            cookie.StartsWith("SERVERID=", StringComparison.OrdinalIgnoreCase));
+
+        if (string.IsNullOrWhiteSpace(authorization) || string.IsNullOrWhiteSpace(serverId))
+        {
+            throw new InvalidOperationException("Cookie missing Authorization or SERVERID; the code may be expired.");
+        }
+
+        return $"{authorization}; {serverId}";
     }
 
     internal static void ThrowIfCookieResponseFailed(RestResponse response, IReadOnlyList<string>? responseCookies)

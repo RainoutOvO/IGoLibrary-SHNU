@@ -234,6 +234,26 @@ public sealed class TraceIntApiClientTests
     }
 
     [Fact]
+    public async Task GetCookieFromCodeAsync_HandlesReversedResponseCookieOrdering()
+    {
+        var cookieHttpClient = new FakeTraceIntCookieHttpClient(
+            (_, _) => Task.FromResult(CookieResponse(
+                HttpStatusCode.Found,
+                "Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9",
+                "SERVERID=b9fc7bd86d2eed91b23d7347e0ee995e|1775746288|1775746288")));
+
+        var client = CreateClient(
+            new SequenceHttpMessageHandler(),
+            cookieHttpClient: cookieHttpClient);
+
+        var cookie = await client.GetCookieFromCodeAsync("code-1");
+
+        Assert.Equal(
+            "Authorization=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9; SERVERID=b9fc7bd86d2eed91b23d7347e0ee995e|1775746288|1775746288",
+            cookie);
+    }
+
+    [Fact]
     public async Task GetCookieFromCodeAsync_RetriesTimedOutRequest_UsingSavedTimeoutSetting()
     {
         var cookieHttpClient = new FakeTraceIntCookieHttpClient(

@@ -12,7 +12,7 @@ internal sealed class TraceIntGraphQlTransport(
     private const string AppVersion = "2.0.11";
     private static readonly TraceIntGraphQlRequestProfile DefaultProfile = new(
         DesktopUserAgent,
-        "https://libseat.shnu.edu.cn/web/index.html",
+        "https://libseat.shnu.edu.cn/web/",
         "https://libseat.shnu.edu.cn",
         AppVersion);
     internal static readonly TraceIntGraphQlRequestProfile TomorrowReservationProfile = new(
