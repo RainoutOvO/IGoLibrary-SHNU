@@ -32,14 +32,14 @@ namespace IGoLibrary_Winform.Controller
                 request.AddHeader("Content-Type", @"application/json");
                 request.AddHeader("Host", @"wechat.v2.traceint.com");
                 request.AddHeader("Connection", @"keep-alive");
-                request.AddHeader("Origin", @"https://web.traceint.com");
+                request.AddHeader("Origin", @"https://libseat.shnu.edu.cn");
                 request.AddHeader("User-Agent", @"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63070626)");
                 request.AddHeader("App-Version", @"2.0.11");
                 request.AddHeader("Accept", @"*/*");
                 request.AddHeader("Sec-Fetch-Site", @"same-site");
                 request.AddHeader("Sec-Fetch-Mode", @"cors");
                 request.AddHeader("Sec-Fetch-Dest", @"empty");
-                request.AddHeader("Referer", @"https://web.traceint.com/web/index.html");
+                request.AddHeader("Referer", @"https://libseat.shnu.edu.cn/web/index.html");
                 request.AddHeader("Accept-Encoding", @"gzip, deflate, br");
                 request.AddHeader("Accept-Language", @"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
                 //以上信息都是通用的

@@ -267,9 +267,9 @@ public sealed class TraceIntApiClientTests
 
             Assert.Contains("\"key\":\"seat-1.\"", payload);
             Assert.Contains("\"libid\":117580", payload);
-            Assert.Equal("https://web.traceint.com/", request.Headers.Referrer?.ToString());
+            Assert.Equal("https://libseat.shnu.edu.cn/", request.Headers.Referrer?.ToString());
             Assert.True(request.Headers.TryGetValues("Origin", out var origins));
-            Assert.Equal("https://web.traceint.com", Assert.Single(origins));
+            Assert.Equal("https://libseat.shnu.edu.cn", Assert.Single(origins));
             Assert.True(request.Headers.TryGetValues("app-version", out var appVersions));
             Assert.Contains("2.2.5", appVersions);
 

@@ -57,7 +57,7 @@ public sealed class TomorrowReservationQueueTransportTests
         Assert.Contains("排队成功", result.Message);
         Assert.Equal("""{"ns":"prereserve/queue","msg":""}""", Assert.Single(socket.SentMessages));
         Assert.Equal("cookie", socket.Headers["Cookie"]);
-        Assert.Equal("https://web.traceint.com", socket.Headers["Origin"]);
+        Assert.Equal("https://libseat.shnu.edu.cn", socket.Headers["Origin"]);
     }
 
     [Fact]

@@ -12,13 +12,13 @@ internal sealed class TraceIntGraphQlTransport(
     private const string AppVersion = "2.0.11";
     private static readonly TraceIntGraphQlRequestProfile DefaultProfile = new(
         DesktopUserAgent,
-        "https://web.traceint.com/web/index.html",
-        "https://web.traceint.com",
+        "https://libseat.shnu.edu.cn/web/index.html",
+        "https://libseat.shnu.edu.cn",
         AppVersion);
     internal static readonly TraceIntGraphQlRequestProfile TomorrowReservationProfile = new(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63090719) XWEB/8391 Flue",
-        "https://web.traceint.com/",
-        "https://web.traceint.com",
+        "https://libseat.shnu.edu.cn/",
+        "https://libseat.shnu.edu.cn",
         "2.2.5");
 
     public async Task<HttpResponseMessage> SendAsync(string cookie, string payload, CancellationToken cancellationToken)

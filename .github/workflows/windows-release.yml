@@ -1,0 +1,107 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version label, for example v0.4-beta"
+        required: true
+        default: "v0.4-beta"
+      create_release:
+        description: "Upload the zip to a GitHub Release"
+        required: true
+        type: boolean
+        default: true
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows-x64:
+    name: Windows x64
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: IGoLibrary-Ex
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: IGoLibrary-Ex/global.json
+
+      - name: Resolve package metadata
+        id: meta
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $version = "${{ github.ref_name }}"
+          } elseif (-not [string]::IsNullOrWhiteSpace($env:INPUT_VERSION)) {
+            $version = $env:INPUT_VERSION
+          } else {
+            $version = "v0.4-beta"
+          }
+
+          if (-not $version.StartsWith("v", [StringComparison]::OrdinalIgnoreCase)) {
+            $version = "v$version"
+          }
+
+          $fileVersion = $version -replace '[\\/:*?"<>|]', '-'
+          $packageName = "IGoLibrary-Ex-$fileVersion-windows-x64.zip"
+          $packagePath = "artifacts/windows/win-x64/$packageName"
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "package_name=$packageName" >> $env:GITHUB_OUTPUT
+          "package_path=$packagePath" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore IGoLibrary-Ex.sln
+
+      - name: Test
+        run: dotnet test IGoLibrary-Ex.sln --configuration Release --no-restore --verbosity normal
+
+      - name: Publish Windows zip
+        run: |
+          .\build\publish-windows.ps1 `
+            -Configuration Release `
+            -Runtime win-x64 `
+            -SelfContained `
+            -PackageName "${{ steps.meta.outputs.package_name }}"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.package_name }}
+          path: IGoLibrary-Ex/${{ steps.meta.outputs.package_path }}
+          if-no-files-found: error
+
+      - name: Upload GitHub Release asset
+        if: ${{ github.ref_type == 'tag' || inputs.create_release == true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          PACKAGE_PATH: ${{ steps.meta.outputs.package_path }}
+        run: |
+          $assetPath = Join-Path (Get-Location) $env:PACKAGE_PATH
+          gh release view $env:VERSION --repo "${{ github.repository }}" *> $null
+
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:VERSION $assetPath --repo "${{ github.repository }}" --clobber
+          } else {
+            gh release create $env:VERSION $assetPath `
+              --repo "${{ github.repository }}" `
+              --title "IGoLibrary-Ex $env:VERSION" `
+              --notes "Windows x64 build." `
+              --prerelease
+          }
