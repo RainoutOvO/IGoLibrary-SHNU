@@ -13,6 +13,24 @@ public sealed class SessionWorkflowService(
         CancellationToken cancellationToken = default)
     {
         var cookie = await apiClient.GetCookieFromCodeAsync(code, cancellationToken);
+        return await AuthenticateIssuedCookieAsync(cookie, remember, cancellationToken);
+    }
+
+    public async Task<SessionWorkflowResult> AuthenticateFromLinkAsync(
+        string authorizationLink,
+        string code,
+        bool remember,
+        CancellationToken cancellationToken = default)
+    {
+        var cookie = await apiClient.GetCookieFromLinkAsync(authorizationLink, code, cancellationToken);
+        return await AuthenticateIssuedCookieAsync(cookie, remember, cancellationToken);
+    }
+
+    private async Task<SessionWorkflowResult> AuthenticateIssuedCookieAsync(
+        string cookie,
+        bool remember,
+        CancellationToken cancellationToken)
+    {
         var expirationTime = GetCookieExpirationTime(cookie);
 
         try

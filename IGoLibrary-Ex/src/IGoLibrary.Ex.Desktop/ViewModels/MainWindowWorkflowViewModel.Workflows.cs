@@ -573,7 +573,7 @@ public partial class MainWindowWorkflowViewModel
             }
 
             reservedCode = code;
-            var result = await AccountVenue.AuthenticateFromCodeAsync(code, RememberSession);
+            var result = await AccountVenue.AuthenticateFromLinkAsync(linkText, code, RememberSession);
             shouldMarkCodeAsProcessed = true;
             ManualCookieText = result.Cookie ?? string.Empty;
             SessionSummary = result.StatusMessage;

@@ -7,6 +7,12 @@ public interface ISessionWorkflowService
         bool remember,
         CancellationToken cancellationToken = default);
 
+    Task<SessionWorkflowResult> AuthenticateFromLinkAsync(
+        string authorizationLink,
+        string code,
+        bool remember,
+        CancellationToken cancellationToken = default);
+
     Task<SessionWorkflowResult> AuthenticateFromCookieAsync(
         string cookie,
         bool remember,

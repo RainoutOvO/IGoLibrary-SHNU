@@ -18,6 +18,15 @@ public sealed partial class AccountVenueViewModel(
         return sessionWorkflowService.AuthenticateFromCodeAsync(code, remember, cancellationToken);
     }
 
+    public Task<SessionWorkflowResult> AuthenticateFromLinkAsync(
+        string authorizationLink,
+        string code,
+        bool remember,
+        CancellationToken cancellationToken = default)
+    {
+        return sessionWorkflowService.AuthenticateFromLinkAsync(authorizationLink, code, remember, cancellationToken);
+    }
+
     public Task<SessionWorkflowResult> AuthenticateFromCookieAsync(
         string cookie,
         bool remember,

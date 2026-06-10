@@ -1,5 +1,6 @@
 using System.Net;
 using IGoLibrary.Ex.Application.Abstractions;
+using IGoLibrary.Ex.Application.Protocol;
 using RestSharp;
 
 namespace IGoLibrary.Ex.Infrastructure.Api;
@@ -13,8 +14,16 @@ internal sealed class TraceIntCookieTransport(
         string code,
         CancellationToken cancellationToken = default)
     {
+        return await GetCookieAsync(code, authorizationLink: null, cancellationToken);
+    }
+
+    public async Task<TraceIntCookieHttpResponse> GetCookieAsync(
+        string code,
+        string? authorizationLink,
+        CancellationToken cancellationToken = default)
+    {
         var templates = await protocolTemplateStore.GetEffectiveTemplatesAsync(cancellationToken);
-        var requestUrl = templates.GetCookieUrlTemplate.Replace("ReplaceMeByCode", code, StringComparison.Ordinal);
+        var requestUrl = ResolveCookieRequestUrl(code, authorizationLink, templates);
 
         return await requestPolicy.ExecuteAsync(async requestToken =>
         {
@@ -40,6 +49,41 @@ internal sealed class TraceIntCookieTransport(
 
             return result;
         }, "获取 Cookie", cancellationToken);
+    }
+
+    private static string ResolveCookieRequestUrl(
+        string code,
+        string? authorizationLink,
+        TraceIntGraphQlTemplates templates)
+    {
+        var trimmedLink = authorizationLink?.Trim();
+        if (IsTrustedAuthorizationLink(trimmedLink, code))
+        {
+            return trimmedLink!;
+        }
+
+        return templates.GetCookieUrlTemplate.Replace("ReplaceMeByCode", code, StringComparison.Ordinal);
+    }
+
+    private static bool IsTrustedAuthorizationLink(string? authorizationLink, string code)
+    {
+        if (string.IsNullOrWhiteSpace(authorizationLink) ||
+            !Uri.TryCreate(authorizationLink, UriKind.Absolute, out var uri) ||
+            (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
+             !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)) ||
+            string.IsNullOrWhiteSpace(uri.Host))
+        {
+            return false;
+        }
+
+        var host = uri.Host;
+        var trustedHost =
+            host.EndsWith(".traceint.com", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(host, "traceint.com", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(host, "libseat.shnu.edu.cn", StringComparison.OrdinalIgnoreCase);
+
+        return trustedHost &&
+               authorizationLink.Contains($"code={code}", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsRetriableCookieFailure(RestResponse response)

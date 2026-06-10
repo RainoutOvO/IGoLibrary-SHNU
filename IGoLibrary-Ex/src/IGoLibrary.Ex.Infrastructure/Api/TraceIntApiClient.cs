@@ -18,6 +18,13 @@ internal sealed class TraceIntApiClient(
         return BuildCookieHeaderFromResponseCookies(result.Cookies);
     }
 
+    public async Task<string> GetCookieFromLinkAsync(string authorizationLink, string code, CancellationToken cancellationToken = default)
+    {
+        var result = await cookieTransport.GetCookieAsync(code, authorizationLink, cancellationToken);
+        ThrowIfCookieResponseFailed(result.Response, result.Cookies);
+        return BuildCookieHeaderFromResponseCookies(result.Cookies);
+    }
+
     public async Task ValidateCookieAsync(string cookie, CancellationToken cancellationToken = default)
     {
         _ = await GetLibrariesAsync(cookie, cancellationToken);

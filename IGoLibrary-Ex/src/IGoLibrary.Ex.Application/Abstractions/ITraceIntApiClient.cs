@@ -6,6 +6,8 @@ public interface ITraceIntApiClient
 {
     Task<string> GetCookieFromCodeAsync(string code, CancellationToken cancellationToken = default);
 
+    Task<string> GetCookieFromLinkAsync(string authorizationLink, string code, CancellationToken cancellationToken = default);
+
     Task ValidateCookieAsync(string cookie, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<LibrarySummary>> GetLibrariesAsync(string cookie, CancellationToken cancellationToken = default);

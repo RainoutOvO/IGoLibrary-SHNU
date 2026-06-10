@@ -254,6 +254,46 @@ public sealed class TraceIntApiClientTests
     }
 
     [Fact]
+    public async Task GetCookieFromLinkAsync_UsesTrustedAuthorizationLinkDirectly()
+    {
+        const string link = "http://wechat.v2.traceint.com/index.php/graphql/?operationName=index&query=query%7BuserAuth%7BtongJi%7Brank%7D%7D%7D&code=code-1&state=1";
+        var cookieHttpClient = new FakeTraceIntCookieHttpClient(
+            (_, _) => Task.FromResult(CookieResponse(
+                HttpStatusCode.Found,
+                "SERVERID=b",
+                "Authorization=a")));
+
+        var client = CreateClient(
+            new SequenceHttpMessageHandler(),
+            cookieHttpClient: cookieHttpClient);
+
+        var cookie = await client.GetCookieFromLinkAsync(link, "code-1");
+
+        Assert.Equal("Authorization=a; SERVERID=b", cookie);
+        Assert.Equal(link, cookieHttpClient.LastRequestUrl);
+    }
+
+    [Fact]
+    public async Task GetCookieFromLinkAsync_FallsBackToTemplate_WhenLinkHostIsUntrusted()
+    {
+        const string link = "https://example.org/callback?code=code-1&state=1";
+        var cookieHttpClient = new FakeTraceIntCookieHttpClient(
+            (_, _) => Task.FromResult(CookieResponse(
+                HttpStatusCode.Found,
+                "SERVERID=b",
+                "Authorization=a")));
+
+        var client = CreateClient(
+            new SequenceHttpMessageHandler(),
+            cookieHttpClient: cookieHttpClient);
+
+        var cookie = await client.GetCookieFromLinkAsync(link, "code-1");
+
+        Assert.Equal("Authorization=a; SERVERID=b", cookie);
+        Assert.Equal("https://example.com/code-1", cookieHttpClient.LastRequestUrl);
+    }
+
+    [Fact]
     public async Task GetCookieFromCodeAsync_RetriesTimedOutRequest_UsingSavedTimeoutSetting()
     {
         var cookieHttpClient = new FakeTraceIntCookieHttpClient(
@@ -542,11 +582,14 @@ public sealed class TraceIntApiClientTests
 
         public int CallCount { get; private set; }
 
+        public string? LastRequestUrl { get; private set; }
+
         public Task<TraceIntCookieHttpResponse> ExecuteGetAsync(
             string requestUrl,
             CancellationToken cancellationToken)
         {
             CallCount++;
+            LastRequestUrl = requestUrl;
             if (_steps.Count == 0)
             {
                 throw new InvalidOperationException("没有更多预设响应。");

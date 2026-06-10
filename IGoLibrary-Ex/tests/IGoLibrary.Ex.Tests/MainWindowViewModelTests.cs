@@ -244,17 +244,18 @@ public sealed class MainWindowViewModelTests
         var notificationService = new FakeNotificationService();
         var apiClient = new FakeTraceIntApiClient();
         var getCookieCalls = 0;
-        apiClient.OnGetCookieFromCodeAsync = (code, _) =>
+        const string link = "https://example.com/callback?code=1234567890abcdef1234567890abcdef&state=1";
+        apiClient.OnGetCookieFromLinkAsync = (authorizationLink, code, _) =>
         {
             getCookieCalls++;
+            Assert.Equal(link, authorizationLink);
+            Assert.Equal("1234567890abcdef1234567890abcdef", code);
             return Task.FromResult("Authorization=a; SERVERID=b");
         };
 
         var viewModel = CreateViewModel(
             apiClient: apiClient,
             notificationService: notificationService);
-
-        const string link = "https://example.com/callback?code=1234567890abcdef1234567890abcdef&state=1";
 
         var firstResult = await viewModel.TryAutoParseClipboardLinkAsync(link);
         var secondResult = await viewModel.TryAutoParseClipboardLinkAsync(link);

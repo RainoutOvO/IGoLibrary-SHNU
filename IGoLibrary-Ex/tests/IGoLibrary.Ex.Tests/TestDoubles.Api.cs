@@ -13,6 +13,7 @@ namespace IGoLibrary.Ex.Tests;
 internal sealed class FakeTraceIntApiClient : ITraceIntApiClient
 {
     public Func<string, CancellationToken, Task<string>>? OnGetCookieFromCodeAsync { get; set; }
+    public Func<string, string, CancellationToken, Task<string>>? OnGetCookieFromLinkAsync { get; set; }
     public Func<string, CancellationToken, Task>? OnValidateCookieAsync { get; set; }
     public Func<string, CancellationToken, Task<IReadOnlyList<LibrarySummary>>>? OnGetLibrariesAsync { get; set; }
     public Func<string, int, CancellationToken, Task<LibraryLayout>>? OnGetLibraryLayoutAsync { get; set; }
@@ -27,6 +28,11 @@ internal sealed class FakeTraceIntApiClient : ITraceIntApiClient
 
     public Task<string> GetCookieFromCodeAsync(string code, CancellationToken cancellationToken = default)
         => OnGetCookieFromCodeAsync?.Invoke(code, cancellationToken) ?? Task.FromResult(string.Empty);
+
+    public Task<string> GetCookieFromLinkAsync(string authorizationLink, string code, CancellationToken cancellationToken = default)
+        => OnGetCookieFromLinkAsync?.Invoke(authorizationLink, code, cancellationToken) ??
+           OnGetCookieFromCodeAsync?.Invoke(code, cancellationToken) ??
+           Task.FromResult(string.Empty);
 
     public Task ValidateCookieAsync(string cookie, CancellationToken cancellationToken = default)
         => OnValidateCookieAsync?.Invoke(cookie, cancellationToken) ?? Task.CompletedTask;
